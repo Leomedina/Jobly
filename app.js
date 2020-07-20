@@ -2,18 +2,22 @@
 
 const express = require("express");
 const morgan = require("morgan");
-const ExpressError = require("./helpers/expressError");
-
 const app = express();
+const ExpressError = require("./helpers/expressError");
+const companyRoutes = require("./routes/companies")
+
+// Parses JSON from body
 app.use(express.json());
 
 // add logging system
 app.use(morgan("tiny"));
 
+// Routes
+app.use("/companies", companyRoutes);
+
 /** 404 handler */
 app.use(function(req, res, next) {
   const err = new ExpressError("Not Found", 404);
-
   // pass the error to the next piece of middleware
   return next(err);
 });
