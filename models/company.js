@@ -51,16 +51,41 @@ class Company {
 
   /** Retrieve all companies in the database */
   static async findAll() {
-    const results = await db.query(`
-      SELECT handle,
-             name,
-             num_employees,
-             description,
-             logo_url
-        FROM companies
-        ORDER BY handle
-    `);
-    return results.rows;
+    let baseQuery = `SELECT handle, name FROM companies`;
+    let whereExpressions = [];
+    let queryValues = [];
+
+    if (data.min_employees >= data.max_employees) {
+      throw new ExpressError(
+        "Min employees must be less than max employees",
+        400
+      );
+    }
+    
+    if (data.min_employees) {
+      queryValues.push(data.min_employees);
+      whereExpressions.push(`num_employees >= $${queryValues.length}`);
+    }
+
+    if (data.max_employees) {
+      queryValues.push(data.max_employees);
+      whereExpressions.push(`num_employees <= $${queryValues.length}`);
+    }
+
+    if (data.search) {
+      queryValues.push(`%${data.search}%`);
+      whereExpressions.push(`name ILIKE $${queryValues.length}`);
+    }
+
+    if (whereExpressions.length > 0) {
+      baseQuery += " WHERE ";
+    }
+
+    // Finalize query and return results
+
+    let query = baseQuery + whereExpressions.join(" AND ");
+    const companiesRes = await db.query(query, queryValues);
+    return companiesRes.rows;
   };
 
   /** Retrieves a single company from the database */

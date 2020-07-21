@@ -18,7 +18,7 @@ const router = new express.Router();
 /** GET / Companies -> { companies: [company, ...] } */
 router.get("/", async function (req, res, next) {
   try {
-    const companies = await Company.findAll();
+    const companies = await Company.findAll(req.query);
     return res.status(200).json({ companies });
   } catch (error) {
     return next(error);
