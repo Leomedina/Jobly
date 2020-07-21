@@ -16,7 +16,7 @@ CREATE TABLE jobs (
   title text NOT NULL,
   salary float NOT NULL,
   equity float NOT NULL DEFAULT 0,
-  date_posted date DEFAULT CURRENT_DATE NOT NULL,
+  date_posted text DEFAULT CURRENT_DATE NOT NULL,
   company_handle text NOT NULL REFERENCES companies ON DELETE CASCADE,
   listing_url text,
   CONSTRAINT jobs_equity_check CHECK ((equity < (1)::double precision))

@@ -50,7 +50,7 @@ class Company {
   };
 
   /** Retrieve all companies in the database */
-  static async findAll() {
+  static async findAll(data) {
     let baseQuery = `SELECT handle, name FROM companies`;
     let whereExpressions = [];
     let queryValues = [];
@@ -61,7 +61,7 @@ class Company {
         400
       );
     }
-    
+
     if (data.min_employees) {
       queryValues.push(data.min_employees);
       whereExpressions.push(`num_employees >= $${queryValues.length}`);
@@ -84,8 +84,8 @@ class Company {
     // Finalize query and return results
 
     let query = baseQuery + whereExpressions.join(" AND ");
-    const companiesRes = await db.query(query, queryValues);
-    return companiesRes.rows;
+    const results = await db.query(query, queryValues);
+    return results.rows;
   };
 
   /** Retrieves a single company from the database */

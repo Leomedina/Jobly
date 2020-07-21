@@ -7,6 +7,7 @@
 
 const jsonschema = require("jsonschema");
 const companySchema = require("../schemas/companiesSchema.json");
+const jobSchema = require("../schemas/jobsSchema.json");
 const ExpressError = require("../helpers/expressError");
 
 
@@ -52,4 +53,4 @@ function valUserSchema(req, res, next) {
   }
 }
 
-module.exports = valCompanySchema, valJobSchema, valUserSchema;
+module.exports = { valCompanySchema, valJobSchema, valUserSchema };

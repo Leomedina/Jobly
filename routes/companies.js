@@ -10,16 +10,22 @@
 */
 
 const express = require("express");
-const Company = require("../models/company");
-const valCompanySchema = require("../middleware/schemaValidators");
+const Table = require("../models/table");
+const { valCompanySchema } = require("../middleware/schemaValidators");
 
 const router = new express.Router();
+const company = new Table("companies", "handle", ["handle",
+  "name",
+  "num_employees",
+  "description",
+  "logo_url"]
+);
 
 /** GET / Companies -> { companies: [company, ...] } */
 router.get("/", async function (req, res, next) {
   try {
-    const companies = await Company.findAll(req.query);
-    return res.status(200).json({ companies });
+    const results = await company.findAll(req.query);
+    return res.status(200).json({ "companies": results });
   } catch (error) {
     return next(error);
   };
@@ -28,8 +34,8 @@ router.get("/", async function (req, res, next) {
 /** POST /companies -> returns created company */
 router.post("/", valCompanySchema, async function (req, res, next) {
   try {
-    const company = await Company.create(req.body);
-    return res.status(201).json({ company });
+    const new_company = await company.create(req.body);
+    return res.status(201).json({ "company": new_company });
   } catch (error) {
     return next(error);
   }
@@ -38,18 +44,18 @@ router.post("/", valCompanySchema, async function (req, res, next) {
 /** GET / Companies / handle -> { company: [handle, ...] } */
 router.get("/:handle", async function (req, res, next) {
   try {
-    const company = await Company.get(req.params.handle);
-    return res.status(200).json({ company });
+    const result = await company.get(req.params.handle);
+    return res.status(200).json({ "company": result });
   } catch (error) {
     return next(error);
   };
 });
 
 /** PUT / companies / handle -> { company: [handle, ...] } */
-router.put("/:handle", valCompanySchema, async function (req, res, next) {
+router.patch("/:handle", async function (req, res, next) {
   try {
-    const company = await Company.update(req.params.handle, req.body);
-    return res.status(200).json({ company });
+    const result = await company.update(req.params.handle, req.body);
+    return res.status(200).json({ "company": result });
   } catch (error) {
     return next(error);
   };
@@ -58,7 +64,7 @@ router.put("/:handle", valCompanySchema, async function (req, res, next) {
 /** DELETE / Companies / handle -> { message: "Company deleted" } */
 router.delete("/:handle", async function (req, res, next) {
   try {
-    await Company.remove(req.params.handle);
+    await company.remove(req.params.handle);
     return res.status(200).json({ message: "company deleted" })
   } catch (error) {
     return next(error);
