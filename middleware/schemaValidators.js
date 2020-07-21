@@ -8,6 +8,7 @@
 const jsonschema = require("jsonschema");
 const companySchema = require("../schemas/companiesSchema.json");
 const jobSchema = require("../schemas/jobsSchema.json");
+const userSchema = require("../schemas/usersSchema.json");
 const ExpressError = require("../helpers/expressError");
 
 
