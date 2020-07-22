@@ -2,6 +2,7 @@
 
 DROP TABLE IF EXISTS companies;
 DROP TABLE IF EXISTS jobs;
+DROP TABLE IF EXISTS users;
 
 CREATE TABLE companies (
   handle text PRIMARY KEY,
@@ -23,7 +24,8 @@ CREATE TABLE jobs (
 );
 
 CREATE TABLE users (
-  email text PRIMARY KEY,
+  id serial PRIMARY KEY,
+  email text,
   password text NOT NULL,
   name text NOT NULL,
   photo_url text,

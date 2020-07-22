@@ -3,29 +3,35 @@
 const express = require("express");
 const morgan = require("morgan");
 const app = express();
+const { authenticateJWT } = require("./middleware/auth");
 const ExpressError = require("./helpers/expressError");
-const companyRoutes = require("./routes/companies")
-const jobRoutes = require("./routes/jobs")
+const companyRoutes = require("./routes/companies");
+const jobRoutes = require("./routes/jobs");
+const userRoutes = require("./routes/users");
 
-// Parses JSON from body
+// allow json body parsing
 app.use(express.json());
 
 // add logging system
 app.use(morgan("tiny"));
 
-// Routes
+// get auth token for all routes
+app.use(authenticateJWT);
+
+/** ROUTES */
 app.use("/companies", companyRoutes);
 app.use("/jobs", jobRoutes);
+app.use("/users", userRoutes);
 
 /** 404 handler */
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   const err = new ExpressError("Not Found", 404);
   // pass the error to the next piece of middleware
   return next(err);
 });
 
 /** general error handler */
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   res.status(err.status || 500);
   console.error(err.stack);
 

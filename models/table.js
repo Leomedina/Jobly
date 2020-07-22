@@ -26,6 +26,22 @@ class Table {
     return result.rows[0];
   };
 
+  //this is hard-coded
+  async register({ email, password, name, photo_url, is_admin }) {
+    const hashed_password = await bcrypt.hash(password, BCRYPT_WORK_FACTOR);
+    const results = await db.query(`
+          INSERT INTO user (
+              email,
+              password,
+              name,
+              photo_url, 
+              is_admin)
+            VALUES ($1, $2, $3, $4, $5)
+            RETURNING email, password, name, photo_url, is_admin
+      `, [email, hashed_password, name, photo_url, is]);
+    return results.rows[0];
+  }
+
   /** Gets a single object in the DB based on primary key */
   async get(primary_key) {
     const cols = this.columns.join(", ");

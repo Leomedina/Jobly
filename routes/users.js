@@ -11,7 +11,9 @@
 
 const express = require("express");
 const { valUserSchema } = require("../middleware/schemaValidators");
+const { ensureLoggedIn, ensuresCorrectUser } = require("../middleware/auth");
 const Table = require("../models/table.js");
+const { SECRET_KEY } = require("../config");
 const router = new express.Router();
 
 const user = new Table("users", "id", ["id",
@@ -23,7 +25,7 @@ const user = new Table("users", "id", ["id",
 );
 
 /** GET / user -> { user: [user, ...] } */
-router.get("/", async function (req, res, next) {
+router.get('/', ensureLoggedIn, async function (req, res, next) {
   try {
     const results = await user.findAll(req.query);
     return res.status(200).json({ "users": results });
@@ -32,18 +34,19 @@ router.get("/", async function (req, res, next) {
   };
 });
 
-/** POST /jobs -> returns created job */
-router.post("/", valUserSchema, async function (req, res, next) {
+/** POST /user -> returns created user */
+router.post('/', valUserSchema, async function (req, res, next) {
   try {
-    const new_user = await user.create(req.body);
-    return res.status(201).json({ "user": new_user });
+    const { email } = await user.register(req.body);
+    const token = jwt.sign({ email }, SECRET_KEY)
+    return res.status(201).json({ token });
   } catch (error) {
     return next(error);
   }
 });
 
-/** GET / jobs / id -> { job: [id, ...] } */
-router.get("/:id", async function (req, res, next) {
+/** GET / user / id -> { user: [id, ...] } */
+router.get('/:id', ensureLoggedIn, async function (req, res, next) {
   try {
     const result = await user.get(req.params.id);
     return res.status(200).json({ "user": result });
@@ -52,8 +55,8 @@ router.get("/:id", async function (req, res, next) {
   };
 });
 
-/** PUT / jobs / id -> { job: [id, ...] } */
-router.patch("/:id", async function (req, res, next) {
+/** PUT / user / user -> { user: [user, ...] } */
+router.patch('/:id', ensuresCorrectUser, async function (req, res, next) {
   try {
     const result = await user.update(req.params.id, req.body);
     return res.status(200).json({ "user": result });
@@ -62,8 +65,8 @@ router.patch("/:id", async function (req, res, next) {
   };
 });
 
-/** DELETE / jobs / id -> { message: "Company deleted" } */
-router.delete("/:id", async function (req, res, next) {
+/** DELETE / user / user -> { message: "Company deleted" } */
+router.delete('/:id', ensuresCorrectUser, async function (req, res, next) {
   try {
     await user.remove(req.params.id);
     return res.status(200).json({ message: "user deleted" })
