@@ -12,6 +12,7 @@
 const express = require("express");
 const Table = require("../models/table");
 const { valCompanySchema } = require("../middleware/schemaValidators");
+const { ensureLoggedIn } = require("../middleware/auth");
 
 const router = new express.Router();
 const company = new Table("companies", "handle", ["handle",
@@ -22,7 +23,7 @@ const company = new Table("companies", "handle", ["handle",
 );
 
 /** GET / Companies -> { companies: [company, ...] } */
-router.get("/", async function (req, res, next) {
+router.get("/", ensureLoggedIn, async function (req, res, next) {
   try {
     const results = await company.findAll(req.query);
     return res.status(200).json({ "companies": results });
@@ -32,7 +33,7 @@ router.get("/", async function (req, res, next) {
 });
 
 /** POST /companies -> returns created company */
-router.post("/", valCompanySchema, async function (req, res, next) {
+router.post("/", [valCompanySchema, ensureLoggedIn], async function (req, res, next) {
   try {
     const new_company = await company.create(req.body);
     return res.status(201).json({ "company": new_company });
@@ -42,7 +43,7 @@ router.post("/", valCompanySchema, async function (req, res, next) {
 });
 
 /** GET / Companies / handle -> { company: [handle, ...] } */
-router.get("/:handle", async function (req, res, next) {
+router.get("/:handle", ensureLoggedIn, async function (req, res, next) {
   try {
     const result = await company.get(req.params.handle);
     return res.status(200).json({ "company": result });
@@ -52,7 +53,7 @@ router.get("/:handle", async function (req, res, next) {
 });
 
 /** PUT / companies / handle -> { company: [handle, ...] } */
-router.patch("/:handle", async function (req, res, next) {
+router.patch("/:handle", ensureLoggedIn, async function (req, res, next) {
   try {
     const result = await company.update(req.params.handle, req.body);
     return res.status(200).json({ "company": result });
@@ -62,7 +63,7 @@ router.patch("/:handle", async function (req, res, next) {
 });
 
 /** DELETE / Companies / handle -> { message: "Company deleted" } */
-router.delete("/:handle", async function (req, res, next) {
+router.delete("/:handle", ensureLoggedIn, async function (req, res, next) {
   try {
     await company.remove(req.params.handle);
     return res.status(200).json({ message: "company deleted" })

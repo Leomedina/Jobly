@@ -9,6 +9,8 @@
  * 
 */
 const db = require("../db");
+const bcrypt = require("bcrypt");
+const BCRYPT_WORK_FACTOR = 12;
 
 class Table {
 
@@ -30,7 +32,7 @@ class Table {
   async register({ email, password, name, photo_url, is_admin }) {
     const hashed_password = await bcrypt.hash(password, BCRYPT_WORK_FACTOR);
     const results = await db.query(`
-          INSERT INTO user (
+          INSERT INTO users (
               email,
               password,
               name,
@@ -38,9 +40,25 @@ class Table {
               is_admin)
             VALUES ($1, $2, $3, $4, $5)
             RETURNING email, password, name, photo_url, is_admin
-      `, [email, hashed_password, name, photo_url, is]);
+      `, [email, hashed_password, name, photo_url, is_admin]);
     return results.rows[0];
   }
+
+  async authenticate(email, password) {
+    const results = await db.query(`
+        SELECT email, password
+          FROM users
+          WHERE email=$1
+      `, [email]);
+    const user = results.rows[0];
+    if (user) {
+      if (await bcrypt.compare(password, user.password)) {
+        return true;
+      }
+    };
+    throw new ExpressError("Invalid email or Password", 400);
+  };
+
 
   /** Gets a single object in the DB based on primary key */
   async get(primary_key) {
@@ -76,8 +94,6 @@ class Table {
     };
     return result.rows[0];
   };
-
-
 
   /** handle search queries */
   async findAll(query) {
@@ -125,8 +141,7 @@ class Table {
       whereExpressions.push(`${this.columns[1]} ILIKE $${queryValues.length}`);
     };
     return { whereExpressions, queryValues };
-  }
-
+  };
 
   /** Helper Function for create */
   createQuery(data) {
@@ -186,7 +201,7 @@ class Table {
     values.push(primary_key);
 
     return { query, values };
-  }
+  };
 };
 
 module.exports = Table;

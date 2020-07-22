@@ -11,6 +11,7 @@
 
 const express = require("express");
 const { valJobSchema } = require("../middleware/schemaValidators");
+const { ensureLoggedIn } = require("../middleware/auth");
 const Table = require("../models/table.js");
 const router = new express.Router();
 
@@ -23,7 +24,7 @@ const job = new Table("jobs", "id", ["id",
 );
 
 /** GET / jobs -> { jobs: [job, ...] } */
-router.get("/", async function (req, res, next) {
+router.get("/", ensureLoggedIn, async function (req, res, next) {
   try {
     const results = await job.findAll(req.query);
     return res.status(200).json({ "jobs": results });
@@ -33,7 +34,7 @@ router.get("/", async function (req, res, next) {
 });
 
 /** POST /jobs -> returns created job */
-router.post("/", valJobSchema, async function (req, res, next) {
+router.post("/", [valJobSchema, ensureLoggedIn], async function (req, res, next) {
   try {
     const new_job = await job.create(req.body);
     return res.status(201).json({ "job": new_job });
@@ -43,7 +44,7 @@ router.post("/", valJobSchema, async function (req, res, next) {
 });
 
 /** GET / jobs / id -> { job: [id, ...] } */
-router.get("/:id", async function (req, res, next) {
+router.get("/:id", ensureLoggedIn, async function (req, res, next) {
   try {
     const result = await job.get(req.params.id);
     return res.status(200).json({ "job": result });
@@ -53,7 +54,7 @@ router.get("/:id", async function (req, res, next) {
 });
 
 /** PUT / jobs / id -> { job: [id, ...] } */
-router.patch("/:id", async function (req, res, next) {
+router.patch("/:id", ensureLoggedIn, async function (req, res, next) {
   try {
     const result = await job.update(req.params.id, req.body);
     return res.status(200).json({ "job": result });
@@ -63,7 +64,7 @@ router.patch("/:id", async function (req, res, next) {
 });
 
 /** DELETE / jobs / id -> { message: "Company deleted" } */
-router.delete("/:id", async function (req, res, next) {
+router.delete("/:id", ensureLoggedIn, async function (req, res, next) {
   try {
     await job.remove(req.params.id);
     return res.status(200).json({ message: "job deleted" })

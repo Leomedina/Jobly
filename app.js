@@ -16,7 +16,7 @@ app.use(express.json());
 app.use(morgan("tiny"));
 
 // get auth token for all routes
-app.use(authenticateJWT);
+// app.use(authenticateJWT);
 
 /** ROUTES */
 app.use("/companies", companyRoutes);

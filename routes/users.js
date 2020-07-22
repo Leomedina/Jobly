@@ -10,6 +10,7 @@
 */
 
 const express = require("express");
+const jwt = require("jsonwebtoken");
 const { valUserSchema } = require("../middleware/schemaValidators");
 const { ensureLoggedIn, ensuresCorrectUser } = require("../middleware/auth");
 const Table = require("../models/table.js");
@@ -24,7 +25,7 @@ const user = new Table("users", "id", ["id",
   "is_admin"]
 );
 
-/** GET / user -> { user: [user, ...] } */
+/** GET / users -> { user: [user, ...] } */
 router.get('/', ensureLoggedIn, async function (req, res, next) {
   try {
     const results = await user.findAll(req.query);
@@ -34,9 +35,10 @@ router.get('/', ensureLoggedIn, async function (req, res, next) {
   };
 });
 
-/** POST /user -> returns created user */
+/** POST /users -> returns created user */
 router.post('/', valUserSchema, async function (req, res, next) {
   try {
+    console.log(req.body);
     const { email } = await user.register(req.body);
     const token = jwt.sign({ email }, SECRET_KEY)
     return res.status(201).json({ token });
@@ -45,7 +47,19 @@ router.post('/', valUserSchema, async function (req, res, next) {
   }
 });
 
-/** GET / user / id -> { user: [id, ...] } */
+router.post('/login', async function (req, res, next) {
+  try {
+    const { email, password } = req.body;
+    if (await user.authenticate(email, password)) {
+      const token = jwt.sign({ email }, SECRET_KEY);
+      return res.status(200).json({ email, token });
+    }
+  } catch (error) {
+    return next(error);
+  };
+});
+
+/** GET / users / id -> { user: [id, ...] } */
 router.get('/:id', ensureLoggedIn, async function (req, res, next) {
   try {
     const result = await user.get(req.params.id);
@@ -55,7 +69,7 @@ router.get('/:id', ensureLoggedIn, async function (req, res, next) {
   };
 });
 
-/** PUT / user / user -> { user: [user, ...] } */
+/** PUT / users / user -> { user: [user, ...] } */
 router.patch('/:id', ensuresCorrectUser, async function (req, res, next) {
   try {
     const result = await user.update(req.params.id, req.body);
@@ -65,7 +79,7 @@ router.patch('/:id', ensuresCorrectUser, async function (req, res, next) {
   };
 });
 
-/** DELETE / user / user -> { message: "Company deleted" } */
+/** DELETE / users / user -> { message: "Company deleted" } */
 router.delete('/:id', ensuresCorrectUser, async function (req, res, next) {
   try {
     await user.remove(req.params.id);
