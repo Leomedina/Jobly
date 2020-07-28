@@ -1,11 +1,21 @@
-/** Collection of methods related to companies
+/** Collection of flexible methods for a method
  * 
- * Functions
- *  -> Create   - Creates new company in database.
- *  -> Remove   - Deletes a single company from the database.
- *  -> FindAll  - Retrieves all companies in database.
- *  -> get      - Retrieves a single company in database.
- *  -> Update   - Updates a single company in database.
+ * Class Methods:
+ *  USER-ONLY:
+ *  -> Register       - Registers a user to the user's table.
+ *  -> Authenticate   - Authenticates a user to the table.
+ * 
+ * CRUD:
+ *  -> get            - retrieves single item from database.
+ *  -> findAll        - retrieves all items from database or items matching query.
+ *  -> create         - Creates a new item in the database.
+ *  -> update         - Updates item in the database.
+ *  -> delete         - Deletes item in the database.
+ * 
+ * Helper functions:
+ *  -> WhereExpressions     - creates where expressions depending on query passed
+ *  -> createquery          - creates SQL queries.
+ *  -> partialupdatequery   - creates queries for update
  * 
 */
 const db = require("../db");
@@ -13,22 +23,13 @@ const bcrypt = require("bcrypt");
 const BCRYPT_WORK_FACTOR = 12;
 
 class Table {
-
+  /**Creates the table MUST match PostgreSQL database*/
   constructor(table_name, primary_key, columns) {
     this.table_name = table_name;
     this.primary_key = primary_key;
     this.columns = [...columns];
   }
-
-  /** Create a new object in the DB */
-  async create(data) {
-    const { query, values } = this.createQuery(data);
-    const result = await db.query(query, values);
-
-    return result.rows[0];
-  };
-
-  //this is hard-coded
+  //this is specifically for a user-table used to register and authenticate users
   async register({ email, password, name, photo_url, is_admin }) {
     const hashed_password = await bcrypt.hash(password, BCRYPT_WORK_FACTOR);
     const results = await db.query(`
@@ -59,41 +60,17 @@ class Table {
     throw new ExpressError("Invalid email or Password", 400);
   };
 
-
   /** Gets a single object in the DB based on primary key */
   async get(primary_key) {
     const cols = this.columns.join(", ");
 
     const results = await db.query(`
-    SELECT ${cols} FROM ${this.table_name}
-    WHERE ${this.primary_key}=$1
-    `, [primary_key]);
+      SELECT ${cols} FROM ${this.table_name}
+      WHERE ${this.primary_key}=$1
+      `, [primary_key]);
 
     return results.rows[0];
   }
-
-  /** Deletes a single object from DB */
-  async remove(primary_key) {
-    const result = await db.query(`
-      DELETE FROM ${this.table_name}
-        WHERE ${this.primary_key} = $1
-        RETURNING ${this.primary_key}
-    `, [primary_key]);
-
-    if (result.rowCount === 0) {
-      throw { message: `No item with ${this.primary_key}: ${primary_key}`, status: 400 }
-    };
-  };
-
-  async update(primary_key, data) {
-    const { query, values } = this.partialUpdateQuery(primary_key, data);
-    const result = await db.query(query, values);
-
-    if (result.rowCount === 0) {
-      throw { message: `No item with ${this.primary_key}: ${primary_key}`, status: 400 }
-    };
-    return result.rows[0];
-  };
 
   /** handle search queries */
   async findAll(query) {
@@ -110,6 +87,39 @@ class Table {
     return results.rows;
   }
 
+  /** Create a new object in the DB */
+  async create(data) {
+    const { query, values } = this.createQuery(data);
+    const result = await db.query(query, values);
+
+    return result.rows[0];
+  };
+
+  /** Updates item in the database */
+  async update(primary_key, data) {
+    const { query, values } = this.partialUpdateQuery(primary_key, data);
+    const result = await db.query(query, values);
+
+    if (result.rowCount === 0) {
+      throw { message: `No item with ${this.primary_key}: ${primary_key}`, status: 400 }
+    };
+    return result.rows[0];
+  };
+
+  /** Deletes a single object from DB */
+  async remove(primary_key) {
+    const result = await db.query(`
+      DELETE FROM ${this.table_name}
+        WHERE ${this.primary_key} = $1
+        RETURNING ${this.primary_key}
+    `, [primary_key]);
+
+    if (result.rowCount === 0) {
+      throw { message: `No item with ${this.primary_key}: ${primary_key}`, status: 400 }
+    };
+  };
+
+  /**Helper function to build where expressions for querying data*/
   whereExpressions(query) {
     let min = null;
     let max = null;
