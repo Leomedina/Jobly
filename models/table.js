@@ -1,18 +1,18 @@
 /** Collection of flexible methods for a method
  * 
  * Class Methods:
- *  USER-ONLY:
+ *  USER-ONLY: (remove this - move to util funcs)
  *  -> Register       - Registers a user to the user's table.
  *  -> Authenticate   - Authenticates a user to the table.
  * 
- * CRUD:
+ * CRUD: (string queries into const move to utils)
  *  -> get            - retrieves single item from database.
  *  -> findAll        - retrieves all items from database or items matching query.
  *  -> create         - Creates a new item in the database.
  *  -> update         - Updates item in the database.
  *  -> delete         - Deletes item in the database.
  * 
- * Helper functions:
+ * Helper functions: (move to utils, non class dependant - utility class)
  *  -> WhereExpressions     - creates where expressions depending on query passed
  *  -> createquery          - creates SQL queries.
  *  -> partialupdatequery   - creates queries for update
@@ -119,13 +119,14 @@ class Table {
     };
   };
 
-  /**Helper function to build where expressions for querying data*/
+  /**Helper function to build where expressions for querying data (move to utilities) */
   whereExpressions(query) {
     let min = null;
     let max = null;
     let whereExpressions = []
     let queryValues = []
-
+    
+    /** switch case on where to optimize - makes it easier to read */
     for (let item in query) {
       if (item.includes("min")) {
         min = [item, query[item]];
@@ -159,7 +160,7 @@ class Table {
     let columns = [];
     let valuesVariable = []
 
-    // filter out keys that start with "_" -- we don't want these in DB
+    // filter out keys that start with "_" -- we don't want these in DB (see where i can use map or ES2015+ funcs)
     for (let column in data) {
       if (column.startsWith("_")) {
         delete data[column];

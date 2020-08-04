@@ -25,6 +25,7 @@ const company = new Table("companies", "handle", ["handle",
 /** GET / Companies -> { companies: [company, ...] } */
 router.get("/", ensureLoggedIn, async function (req, res, next) {
   try {
+    console.log("here");
     const results = await company.findAll(req.query);
     return res.status(200).json({ "companies": results });
   } catch (error) {
