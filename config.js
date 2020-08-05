@@ -12,8 +12,6 @@ const PORT = +process.env.PORT || 3000;
 // - in testing, 'jobly-test'
 // - else: 'jobly'
 
-// let DB_URI = `postgresql:///jobly`
-
 let DB_URI;
 
 if (process.env.NODE_ENV === "test") {

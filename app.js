@@ -13,7 +13,7 @@ const userRoutes = require("./routes/users");
 app.use(express.json());
 
 // add logging system
-app.use(morgan("tiny"));
+app.use(morgan("dev"));
 
 // get auth token for all routes
 app.use(authenticateJWT);
@@ -22,6 +22,13 @@ app.use(authenticateJWT);
 app.use("/companies", companyRoutes);
 app.use("/jobs", jobRoutes);
 app.use("/users", userRoutes);
+
+app.get('/hi', function (req, res, next) {
+  return res.status(200).json({
+    'status': 201,
+    'item': "NOTHING",
+  })
+});
 
 /** 404 handler */
 app.use(function (req, res, next) {
@@ -32,6 +39,7 @@ app.use(function (req, res, next) {
 
 /** general error handler */
 app.use(function (err, req, res, next) {
+  console.log("HERE");
   res.status(err.status || 500);
   console.error(err.stack);
 
