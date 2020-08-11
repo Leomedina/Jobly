@@ -38,7 +38,6 @@ router.get('/', ensureLoggedIn, async function (req, res, next) {
 /** POST /users -> returns created user */
 router.post('/', valUserSchema, async function (req, res, next) {
   try {
-    console.log(req.body);
     const { email } = await user.register(req.body);
     const token = jwt.sign({ email }, SECRET_KEY)
     return res.status(201).json({ token });

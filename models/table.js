@@ -19,6 +19,7 @@
  * 
 */
 const db = require("../db");
+const ExpressError = require("../helpers/expressError");
 const bcrypt = require("bcrypt");
 const BCRYPT_WORK_FACTOR = 12;
 
@@ -82,7 +83,6 @@ class Table {
     }
 
     const new_query = baseQuery + whereExpressions.join(" AND ");
-    console.log(new_query)
     const results = await db.query(new_query, queryValues);
     return results.rows;
   }

@@ -39,9 +39,7 @@ app.use(function (req, res, next) {
 
 /** general error handler */
 app.use(function (err, req, res, next) {
-  console.log("HERE");
   res.status(err.status || 500);
-  console.error(err.stack);
 
   return res.json({
     status: err.status,
