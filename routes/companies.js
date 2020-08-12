@@ -33,7 +33,7 @@ router.get("/", ensureLoggedIn, async function (req, res, next) {
 });
 
 /** POST /companies -> returns created company */
-router.post("/", [valCompanySchema, ensureLoggedIn], async function (req, res, next) {
+router.post("/", valCompanySchema, ensureLoggedIn, async function (req, res, next) {
   try {
     const new_company = await company.create(req.body);
     return res.status(201).json({ "company": new_company });

@@ -34,7 +34,7 @@ router.get("/", ensureLoggedIn, async function (req, res, next) {
 });
 
 /** POST /jobs -> returns created job */
-router.post("/", [valJobSchema, ensureLoggedIn], async function (req, res, next) {
+router.post("/", valJobSchema, ensureLoggedIn, async function (req, res, next) {
   try {
     const new_job = await job.create(req.body);
     return res.status(201).json({ "job": new_job });

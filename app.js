@@ -12,11 +12,12 @@ const userRoutes = require("./routes/users");
 // allow json body parsing
 app.use(express.json());
 
+// get auth token for all routes
+app.use(authenticateJWT);
+
 // add logging system
 app.use(morgan("dev"));
 
-// get auth token for all routes
-app.use(authenticateJWT);
 
 /** ROUTES */
 app.use("/companies", companyRoutes);

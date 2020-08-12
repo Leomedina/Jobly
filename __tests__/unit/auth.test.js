@@ -7,8 +7,6 @@
  * 
  */
 
-process.env.NODE_ENV = "test";
-
 const jwt = require("jsonwebtoken");
 const request = require("supertest");
 const httpMocks = require("node-mocks-http");

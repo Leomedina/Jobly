@@ -13,7 +13,7 @@ function authenticateJWT(req, res, next) {
     req.user = payload; // create a current user
     return next();
   } catch (error) {
-    req.user = "no user"; // create a current user
+    req.user = "no user"
     return next();
   };
 };
@@ -21,8 +21,9 @@ function authenticateJWT(req, res, next) {
 /** Requires user is authenticated. */
 
 function ensureLoggedIn(req, res, next) {
-  if (!req.user) {
-    return next(new ExpressError("Unauthorize", 401));
+  if (req.user === "no user") {
+    const err = new ExpressError("Unauthorize", 401)
+    return next(err);
   } else {
     return next()
   };
